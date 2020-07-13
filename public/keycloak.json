@@ -1,0 +1,8 @@
+{
+    "realm": "TodoProject",
+    "auth-server-url": "http://keycloak.trullingham.com/auth/",
+    "ssl-required": "none",
+    "resource": "my-react-client",
+    "public-client": true,
+    "confidential-port": 0
+  }
