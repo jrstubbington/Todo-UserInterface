@@ -2,12 +2,16 @@ import React, { useState } from "react";
 // import fetchIntercept from "fetch-intercept";
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, useHistory } from "react-router-dom";
 import { Store } from "../store/store";
 import HomePage from "./HomePage";
 import { ThemeProvider } from "emotion-theming";
-// import { UserManagementApi } from "accountServiceApi";
-import { TaskManagementApi, CategoryManagementApi } from "taskServiceApi";
+import { WorkspaceManagementApi, WorkspaceDto } from "accountServiceApi";
+import {
+  TaskManagementApi,
+  CategoryManagementApi,
+  CategoryDto,
+} from "taskServiceApi";
 import Keycloak, { KeycloakInstance } from "keycloak-js";
 import Theme from "./interfaces/Theme";
 
@@ -36,6 +40,7 @@ export default function App(): JSX.Element {
   const [keycloak, setKeycloak] = useState<KeycloakInstance | undefined>(
     undefined
   );
+  const history = useHistory();
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   // const [bearer_token, setBearerToken] = useState<string | undefined>(
   //   undefined
@@ -44,6 +49,7 @@ export default function App(): JSX.Element {
 
   // const userUuid = "bbad57b3-9f06-4a61-b4d0-fba5ff2bd771";
   const taskManagementApi = new TaskManagementApi();
+  const workSpaceManagementApi = new WorkspaceManagementApi();
   // const userManagementApi = new UserManagementApi();
   const categoriesManagementApi = new CategoryManagementApi();
 
@@ -116,17 +122,19 @@ export default function App(): JSX.Element {
     }
   });
 
-  const fetchTaskDataAction = async () => {
+  const fetchTasksDataAction = async (categoryUuid: string) => {
     // const taskManagementApi = new TaskManagementApi(); //{accessToken: keycloak?.token}
-    //TODO move to fetch intercept
+    //TODO move to fetch intercep
+    console.log("FETCH TASK DATA");
     const requestHeaders: any = {
       headers: {
         Authorization: "Bearer " + keycloak?.token,
       },
     };
     //the below user id isn't used, just need a place holder to avoid a format exception
-    const data = taskManagementApi.getTaskListByUserUuid(
-      "bbad57b3-9f06-4a61-b4d0-fba5ff2bd771",
+    // const data = taskManagementApi
+    const data = categoriesManagementApi.getTasksByCategoryUUID(
+      state.selected_category,
       requestHeaders
     );
     const dataJSON = (await data).data;
@@ -136,7 +144,27 @@ export default function App(): JSX.Element {
     });
   };
 
-  const fetchCategoriesDataAction = async () => {
+  const fetchWorkspaceDataAction = async (token: string) => {
+    // const taskManagementApi = new TaskManagementApi(); //{accessToken: keycloak?.token}
+    //TODO move to fetch intercept
+    console.log("TOKEN: " + token);
+    const requestHeaders: any = {
+      headers: {
+        Authorization: "Bearer " + keycloak?.token,
+      },
+    };
+    // console.log("REQUEST HEADERS: " + JSON.stringify(requestHeaders));
+    workSpaceManagementApi
+      .getWorkspacesV1(0, 10, requestHeaders)
+      .then((dataJSON) =>
+        dispatch({
+          type: "FETCH_WORKSPACE_DATA",
+          payload: dataJSON.data,
+        })
+      );
+  };
+
+  const fetchCategoriesDataAction = async (workspaceUuid: string) => {
     // const taskManagementApi = new TaskManagementApi(); //{accessToken: keycloak?.token}
     //TODO move to fetch intercept
     const requestHeaders: any = {
@@ -145,7 +173,7 @@ export default function App(): JSX.Element {
       },
     };
     const data = categoriesManagementApi.getCategoryByWorkspaceUuid(
-      "292578fe-35de-45dc-891b-7438409a0942",
+      workspaceUuid,
       requestHeaders
     );
     const dataJSON = (await data).data;
@@ -154,23 +182,6 @@ export default function App(): JSX.Element {
       payload: dataJSON,
     });
   };
-
-  // const fetchUserDataAction = async () => {
-  //   //TODO move to fetch intercept
-  //   // const headers = new Headers();
-  //   // headers.set("Authorization", "Bearer " + keycloak?.token?.toString());
-  //   const requestHeaders: any = {
-  //     headers: {
-  //       Authorization: "Bearer " + keycloak?.token,
-  //     },
-  //   };
-  //   const data = userManagementApi.getUserByUUID(state.user.id, requestHeaders);
-  //   const dataJSON = (await data).data;
-  //   return dispatch({
-  //     type: "FETCH_USER_DATA",
-  //     payload: dataJSON,
-  //   });
-  // };
 
   React.useEffect(() => {
     const keycloak = Keycloak("/keycloak.json");
@@ -187,6 +198,40 @@ export default function App(): JSX.Element {
       });
     });
   }, [dispatch]);
+
+  React.useEffect(() => {
+    console.log(
+      "CHECK FOR PUSH: " +
+        state.workspaces.length +
+        " | " +
+        state.selected_workspace +
+        " | " +
+        history
+    );
+
+    if (
+      state.workspaces.length > 0 &&
+      state.selected_workspace === undefined &&
+      history !== undefined &&
+      history.location.pathname !== "/workspace"
+    ) {
+      history.push("/workspace");
+      console.log("PUSH! " + history.location.pathname);
+    }
+    const selectedWorkspace: string = state.selected_workspace;
+    console.log("CHECKING FETCH CATEGORIES");
+    if (selectedWorkspace) {
+      fetchCategoriesDataAction(selectedWorkspace);
+      console.log("FETCHING CATEGORIES FOR WORKSPACE ID: " + selectedWorkspace);
+    }
+  }, [state.selected_workspace, state.workspaces, state.history]);
+
+  React.useEffect(() => {
+    const selectedCategory: string = state.selected_category;
+    if (selectedCategory) {
+      fetchTasksDataAction(selectedCategory);
+    }
+  }, [state.selected_category]);
 
   React.useEffect(() => {
     if (keycloak && authenticated) {
@@ -209,23 +254,30 @@ export default function App(): JSX.Element {
         payload: keycloak?.token,
       });
     }
+    // workSpaceManagementApi = new WorkspaceManagementApi({
+    //   accessToken: keycloak?.token,
+    // });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
   React.useEffect(() => {
-    state.user !== undefined && authenticated && fetchTaskDataAction();
-    state.user !== undefined && authenticated && fetchCategoriesDataAction();
+    state.user !== undefined &&
+      authenticated &&
+      keycloak &&
+      keycloak.token &&
+      fetchWorkspaceDataAction(keycloak?.token);
+    // state.user !== undefined &&
+    //   authenticated &&
+    //   fetchTasksDataAction("45d56421-3c26-436d-9a3a-0c2e1026ed53");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.user, authenticated]);
+  }, [state.user, authenticated, keycloak?.token]);
 
   if (keycloak) {
     if (authenticated) {
       return (
         <React.Fragment>
           <ThemeProvider theme={theme}>
-            <Router>
-              <HomePage />
-            </Router>
+            <HomePage />
           </ThemeProvider>
         </React.Fragment>
       );

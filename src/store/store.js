@@ -6,7 +6,9 @@ const initialState = {
   tasks: [],
   users: [],
   workspaces: [],
+  selected_workspace: undefined,
   categories: [],
+  selected_category: {},
 };
 
 function reducer(state, action) {
@@ -30,8 +32,12 @@ function reducer(state, action) {
       return { ...state, authenticated: action.payload };
     case "FETCH_WORKSPACE_DATA":
       return { ...state, workspaces: action.payload };
+    case "SET_SELECTED_WORKSPACE":
+      return { ...state, selected_workspace: action.payload };
     case "FETCH_CATEGORIES_DATA":
       return { ...state, categories: action.payload };
+    case "SET_SELECTED_CATEGORY":
+      return { ...state, selected_category: action.payload };
     default:
       return state;
   }

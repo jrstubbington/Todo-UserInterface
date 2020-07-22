@@ -10692,8 +10692,8 @@ tapable@^1.0.0, tapable@^1.1.3:
 
 taskServiceApi@1.0.0:
   version "1.0.0"
-  resolved "http://nexus.trullingham.com/repository/trullingham-npm/taskServiceApi/-/taskServiceApi-1.0.0.tgz#14436c4a6643edc486454a71470f09c95941ff4b"
-  integrity sha512-+MVRdeNaiTu7HydpbyoDuUH+uMJr/ac/yMEgnLTP3vEoDG3I2vwmzoe7mUGYzXSJxwqP4nbHh9aV1DsM0jdjHw==
+  resolved "http://nexus.trullingham.com/repository/trullingham-npm/taskServiceApi/-/taskServiceApi-1.0.0.tgz#0b210a11868ce4694ce17e66bd13506906bf5f31"
+  integrity sha512-ljYaPGHgzuNMVL9cikeTOMz7BS8drJP2n/li9vjAMcBe93W4XQnQKk4T45tOjXYDkkB2XfDwUITYpetitdDk5w==
   dependencies:
     portable-fetch "^3.0.0"
 

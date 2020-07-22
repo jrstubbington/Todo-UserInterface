@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/core";
 import { slide as Menu } from "react-burger-menu";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 // const mainStyle = css`
 //     flex: 1 1 auto;
@@ -69,12 +69,14 @@ const styles = {
 };
 
 function MenuButton(): JSX.Element {
+  const history = useHistory();
+
   return (
     <Menu styles={styles}>
       <Link to={"/"}>Home</Link>
-      <Link to={"/createTask/"}>Create New Task</Link>
-      {/* <a id="preferences" className="menu-item" href="/">Preferences</a><br/> */}
-      {/* <a id="about" className="menu-item" href="/about">About</a><br/> */}
+      <Link to={"/workspace"}>Workspace</Link>
+      <Link to={"/category"}>Category</Link>
+      <Link to={"/createTask"}>Create New Task</Link>
     </Menu>
   );
 }

@@ -4,6 +4,8 @@ import TaskContainer from "./TaskContainer";
 // import LeftMenu from './LeftMenu';
 import { Route, Switch } from "react-router-dom";
 import Test from "./Test";
+import WorkspaceContainer from "./WorkspaceContainer";
+import CategoryContainer from "./CategoryContainer";
 
 const mainStyle = css`
   display: flex;
@@ -24,7 +26,13 @@ function Content(): JSX.Element {
         <Route exact path="/">
           <TaskContainer />
         </Route>
-        <Route path="/createTask">
+        <Route exact path="/workspace">
+          <WorkspaceContainer />
+        </Route>
+        <Route exact path="/category">
+          <CategoryContainer />
+        </Route>
+        <Route exact path="/createTask">
           <Test />
         </Route>
       </Switch>

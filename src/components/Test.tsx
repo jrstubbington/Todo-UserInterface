@@ -51,14 +51,14 @@ function Test(): JSX.Element {
       status: "fuck",
       createdByUserUuid: userInfo?.sub,
       assignedToUserUuid: userInfo?.sub,
-      workspaceUuid: "292578fe-35de-45dc-891b-7438409a0942",
+      workspaceUuid: state.selected_workspace,
       priority: 0,
       reminderDate: startDate,
     };
 
     const taskCreationRequest: TaskCreationRequest = {
       task: task,
-      categoryUuid: "69c0f95e-60fc-4fda-8122-55feddaba33a",
+      categoryUuid: state.selected_category,
     };
 
     const requestHeaders: any = {
